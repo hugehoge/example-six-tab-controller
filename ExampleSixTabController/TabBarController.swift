@@ -33,11 +33,29 @@ class TabBarController: UITabBarController {
                 backgroundColor: .green)
     ]
 
+    private let originalTraitCollection: UITraitCollection
+
+    init(originalTraitCollection: UITraitCollection) {
+        self.originalTraitCollection = originalTraitCollection
+
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tabBar.isTranslucent = false
-        setViewControllers(contents.map { ContentViewController.instantiate(content: $0) }, animated: false)
+
+        let contentVCs = contents.map { ContentViewController.instantiate(content: $0) }
+        for contentVC in contentVCs {
+            // Restore the `UIViewController.traitCollection` to its original value to avoid the inheritance from the parent `UIViewController.traitCollection'.
+            setOverrideTraitCollection(originalTraitCollection, forChild: contentVC)
+        }
+        setViewControllers(contentVCs, animated: false)
 
         selectedIndex = 0
     }
